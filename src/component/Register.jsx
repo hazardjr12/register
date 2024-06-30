@@ -11,6 +11,7 @@ const Register = () => {
     phone: "",
     password: "",
     password2: "",
+    profile: null, // New field for profile image
   });
 
   const [formErrors, setFormErrors] = useState({
@@ -21,15 +22,33 @@ const Register = () => {
     phone: "",
     password: "",
     password2: "",
+    profile: "", // New field for profile image
   });
 
   // Function to handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Form validation logic
     if (validateForm()) {
       console.log("Valid form submitted:", formData);
-      // You can submit the form data to backend or perform further actions here
+
+      // Create a FormData object to handle file upload
+      const formDataObj = new FormData();
+      Object.keys(formData).forEach((key) => {
+        formDataObj.append(key, formData[key]);
+      });
+
+      // Submit the form data to backend or perform further actions here
+      try {
+        const response = await fetch("/your-endpoint", {
+          method: "POST",
+          body: formDataObj,
+        });
+        const result = await response.json();
+        console.log("Form submitted successfully", result);
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      }
     } else {
       console.log("Invalid form - please check errors");
     }
@@ -37,10 +56,10 @@ const Register = () => {
 
   // Function to handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: files ? files[0] : value, // Handle file input
     });
     // Reset error message when user starts typing again
     setFormErrors({
@@ -81,7 +100,7 @@ const Register = () => {
     if (!formData.phone.trim()) {
       errors.phone = "Phone number is required";
       valid = false;
-    } else if (!/^\d{11}$/.test(formData.phone)) {
+    } else if (!/^\d{10}$/.test(formData.phone)) {
       errors.phone = "Phone number is invalid (must be 10 digits)";
       valid = false;
     }
@@ -99,14 +118,28 @@ const Register = () => {
       valid = false;
     }
 
+    if (!formData.profile) {
+      // Validation for new field
+      errors.profile = "Profile image is required";
+      valid = false;
+    } else if (!formData.profile.type.startsWith("image/")) {
+      errors.profile = "Profile image must be an image file";
+      valid = false;
+    }
+
     setFormErrors(errors);
     return valid;
   };
 
   return (
     <section className="container">
-      <form id="form" className="form" onSubmit={handleSubmit}>
-        <h2> sign up</h2>
+      <form
+        id="form"
+        className="form"
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+      >
+        <h2>Sign Up</h2>
         <div className="control">
           <label htmlFor="fname">FIRSTNAME</label>
           <input
@@ -190,6 +223,17 @@ const Register = () => {
             placeholder="Confirm your password"
           />
           <small className="error">{formErrors.password2}</small>
+        </div>
+        <div className="control">
+          <label htmlFor="profile">PROFILE IMAGE</label>
+          <input
+            type="file"
+            name="profile"
+            id="profile"
+            onChange={handleChange}
+            accept="image/*"
+          />
+          <small className="error">{formErrors.profile}</small>
         </div>
         <input type="submit" className="button" value="Register" />
       </form>
