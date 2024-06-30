@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import "../index.css";
+import "../index.css"; // Ensure this path is correct based on your project structure
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const Register = () => {
-  // State to manage form inputs and errors
   const [formData, setFormData] = useState({
     fname: "",
     lname: "",
@@ -11,7 +12,7 @@ const Register = () => {
     phone: "",
     password: "",
     password2: "",
-    profile: null, // New field for profile image
+    profile: null,
   });
 
   const [formErrors, setFormErrors] = useState({
@@ -22,23 +23,22 @@ const Register = () => {
     phone: "",
     password: "",
     password2: "",
-    profile: "", // New field for profile image
+    profile: "",
   });
 
-  // Function to handle form submission
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Form validation logic
     if (validateForm()) {
       console.log("Valid form submitted:", formData);
 
-      // Create a FormData object to handle file upload
       const formDataObj = new FormData();
       Object.keys(formData).forEach((key) => {
         formDataObj.append(key, formData[key]);
       });
 
-      // Submit the form data to backend or perform further actions here
       try {
         const response = await fetch("/your-endpoint", {
           method: "POST",
@@ -54,26 +54,22 @@ const Register = () => {
     }
   };
 
-  // Function to handle input changes
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData({
       ...formData,
       [name]: files ? files[0] : value, // Handle file input
     });
-    // Reset error message when user starts typing again
     setFormErrors({
       ...formErrors,
       [name]: "",
     });
   };
 
-  // Function to validate form fields
   const validateForm = () => {
     let valid = true;
     const errors = {};
 
-    // Validate each field
     if (!formData.fname.trim()) {
       errors.fname = "First name is required";
       valid = false;
@@ -100,7 +96,7 @@ const Register = () => {
     if (!formData.phone.trim()) {
       errors.phone = "Phone number is required";
       valid = false;
-    } else if (!/^\d{10}$/.test(formData.phone)) {
+    } else if (!/^\d{11}$/.test(formData.phone)) {
       errors.phone = "Phone number is invalid (must be 10 digits)";
       valid = false;
     }
@@ -108,7 +104,7 @@ const Register = () => {
     if (!formData.password.trim()) {
       errors.password = "Password is required";
       valid = false;
-    } else if (formData.password.length < 6) {
+    } else if (formData.password.length < 8) {
       errors.password = "Password must be at least 6 characters";
       valid = false;
     }
@@ -119,7 +115,6 @@ const Register = () => {
     }
 
     if (!formData.profile) {
-      // Validation for new field
       errors.profile = "Profile image is required";
       valid = false;
     } else if (!formData.profile.type.startsWith("image/")) {
@@ -202,26 +197,40 @@ const Register = () => {
         </div>
         <div className="control">
           <label htmlFor="password">PASSWORD</label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-          />
+          <div className="password-wrapper">
+            <input
+              type={passwordVisible ? "text" : "password"}
+              name="password"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+            />
+            <FontAwesomeIcon
+              icon={passwordVisible ? faEyeSlash : faEye}
+              onClick={() => setPasswordVisible(!passwordVisible)}
+              className="eye-icon"
+            />
+          </div>
           <small className="error">{formErrors.password}</small>
         </div>
         <div className="control">
           <label htmlFor="password2">CONFIRM PASSWORD</label>
-          <input
-            type="password"
-            name="password2"
-            id="password2"
-            value={formData.password2}
-            onChange={handleChange}
-            placeholder="Confirm your password"
-          />
+          <div className="password-wrapper">
+            <input
+              type={confirmPasswordVisible ? "text" : "password"}
+              name="password2"
+              id="password2"
+              value={formData.password2}
+              onChange={handleChange}
+              placeholder="Confirm your password"
+            />
+            <FontAwesomeIcon
+              icon={confirmPasswordVisible ? faEyeSlash : faEye}
+              onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+              className="eye-icon"
+            />
+          </div>
           <small className="error">{formErrors.password2}</small>
         </div>
         <div className="control">

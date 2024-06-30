@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../style.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +12,7 @@ const Login = () => {
     password: "",
     rememberMe: false,
   });
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const [formErrors, setFormErrors] = useState({
     username: "",
@@ -53,7 +56,7 @@ const Login = () => {
     if (!formData.password.trim()) {
       errors.password = "Password is required";
       valid = false;
-    } else if (formData.password.length < 6) {
+    } else if (formData.password.length < 8) {
       errors.password = "Password must be at least 6 characters";
       valid = false;
     }
@@ -80,14 +83,21 @@ const Login = () => {
         </div>
         <div className="control">
           <label htmlFor="password">PASSWORD</label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-          />
+          <div className="password-wrapper">
+            <input
+              type={passwordVisible ? "text" : "password"}
+              name="password"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+            />
+            <FontAwesomeIcon
+              icon={passwordVisible ? faEyeSlash : faEye}
+              onClick={() => setPasswordVisible(!passwordVisible)}
+              className="eye-icon"
+            />
+          </div>
           <small className="error">{formErrors.password}</small>
         </div>
         <div className="control" id="remember">
